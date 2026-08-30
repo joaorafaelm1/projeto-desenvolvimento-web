@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acolhe - Plataforma de Apoio e Segurança</title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Leaflet CSS (Mapa Real) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="light-theme">
+
+  <!-- BARRA DE NAVEGAÇÃO DESKTOP / PC -->
+  <header class="navbar">
+    <div class="logo" onclick="navigateTo('home')">
+      <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+      <span class="logo-text">acolhe</span>
+    </div>
+
+    <nav class="nav-links">
+      <button class="nav-btn active" data-target="home">
+        <i class="fa-solid fa-house"></i> <span data-i18n="nav_home">Início</span>
+      </button>
+      <button class="nav-btn" data-target="help">
+        <i class="fa-solid fa-hand-holding-heart"></i> <span data-i18n="nav_help">Como Ajudar</span>
+      </button>
+      <button class="nav-btn emergency-nav-link" data-target="emergency">
+        <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="nav_emergency">Emergência</span>
+      </button>
+      <button class="nav-btn" data-target="report">
+        <i class="fa-solid fa-shield-cat"></i> <span data-i18n="nav_report">Fazer Denúncia</span>
+      </button>
+      <button class="nav-btn" data-target="map">
+        <i class="fa-solid fa-location-dot"></i> <span data-i18n="nav_map">Onde Buscar</span>
+      </button>
+    </nav>
+
+    <div class="header-controls">
+      <!-- Seletor de Idioma -->
+      <div class="lang-wrapper">
+        <i class="fa-solid fa-globe"></i>
+        <select id="lang-selector" class="lang-select">
+          <option value="pt" selected>Português</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+
+      <!-- Alternador de Tema Escuro/Claro -->
+      <button id="theme-toggle" class="icon-btn" title="Alternar Tema">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTAINER PRINCIPAL -->
+  <main class="main-container">
+
+    <!-- TELA 1: INÍCIO -->
+    <section id="home" class="page-section active">
+      <div class="card hero-card">
+        <div class="brand-badge">
+          <i class="fa-solid fa-heart-pulse"></i>
+          <span>acolhe</span>
+        </div>
+        <h1 class="pink-title" data-i18n="hero_subtitle">Você não está sozinha.</h1>
+        <p class="hero-desc" data-i18n="hero_desc">Encontre orientação, informações e canais de apoio de forma rápida e segura.</p>
+
+        <button class="btn-primary-large" onclick="navigateTo('emergency')">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span data-i18n="btn_need_help">PRECISO DE AJUDA AGORA</span>
+        </button>
+      </div>
+
+      <div class="section-title">
+        <h3 data-i18n="how_can_we_help">Como podemos ajudar?</h3>
+      </div>
+
+      <div class="grid-cards">
+        <div class="grid-card" onclick="navigateTo('map')">
+          <div class="card-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="card-info">
+            <h4 data-i18n="card_find_help_title">Encontrar ajuda</h4>
+            <p data-i18n="card_find_help_desc">Serviços próximos</p>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+
+        <div class="grid-card" onclick="navigateTo('report')">
+          <div class="card-icon"><i class="fa-solid fa-file-pen"></i></div>
+          <div class="card-info">
+            <h4 data-i18n="card_report_title">Quero denunciar</h4>
+            <p data-i18n="card_report_desc">Saiba como buscar ajuda</p>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+
+        <div class="grid-card" onclick="openModal('rights-modal')">
+          <div class="card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="card-info">
+            <h4 data-i18n="card_rights_title">Meus direitos</h4>
+            <p data-i18n="card_rights_desc">Conheça seus direitos</p>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+
+        <div class="grid-card" onclick="openModal('info-modal')">
+          <div class="card-icon"><i class="fa-solid fa-lightbulb"></i></div>
+          <div class="card-info">
+            <h4 data-i18n="card_info_title">Informações úteis</h4>
+            <p data-i18n="card_info_desc">Orientações e contatos</p>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+      </div>
+
+      <div class="security-footer-banner">
+        <i class="fa-solid fa-lock"></i>
+        <div>
+          <strong data-i18n="security_title">Sua segurança é prioridade.</strong>
+          <p data-i18n="security_desc">Orientações e contatos seguros.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 2: COMO PODEMOS TE AJUDAR? -->
+    <section id="help" class="page-section">
+      <div class="section-header-back">
+        <button class="back-btn" onclick="navigateTo('home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2 data-i18n="help_header">Como podemos te ajudar?</h2>
+      </div>
+      <p class="sub-header" data-i18n="help_subheader">Escolha uma das opções abaixo:</p>
+
+      <div class="list-options">
+        <div class="option-card" onclick="navigateTo('emergency')">
+          <div class="opt-icon danger-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="opt-content">
+            <h4 data-i18n="opt_emergency_title">Emergência</h4>
+            <p data-i18n="opt_emergency_desc">Estou em uma situação de perigo agora.</p>
+          </div>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+
+        <div class="option-card" onclick="navigateTo('report')">
+          <div class="opt-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+          <div class="opt-content">
+            <h4 data-i18n="opt_report_title">Quero fazer uma denúncia</h4>
+            <p data-i18n="opt_report_desc">Quero registrar ou buscar orientação sobre um caso.</p>
+          </div>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+
+        <div class="option-card" onclick="navigateTo('map')">
+          <div class="opt-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+          <div class="opt-content">
+            <h4 data-i18n="opt_map_title">Encontrar ajuda perto de mim</h4>
+            <p data-i18n="opt_map_desc">Quero entender meus direitos e saber onde buscar ajuda.</p>
+          </div>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+
+        <div class="option-card" onclick="openModal('rights-modal')">
+          <div class="opt-icon"><i class="fa-solid fa-circle-info"></i></div>
+          <div class="opt-content">
+            <h4 data-i18n="opt_info_title">Quero informações</h4>
+            <p data-i18n="opt_info_desc">Quero entender meus direitos.</p>
+          </div>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+      </div>
+
+      <div class="security-footer-banner">
+        <i class="fa-solid fa-lock"></i>
+        <div>
+          <strong data-i18n="security_title">Sua segurança é prioridade.</strong>
+          <p data-i18n="security_space">Este é um espaço seguro e confidencial para você.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 3: EMERGÊNCIA -->
+    <section id="emergency" class="page-section">
+      <div class="section-header-back">
+        <button class="back-btn" onclick="navigateTo('home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2 data-i18n="nav_emergency">Emergência</h2>
+      </div>
+
+      <div class="emergency-box">
+        <div class="pulse-icon">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <h3 data-i18n="emergency_now_title">Precisando de ajuda agora?</h3>
+        <p data-i18n="emergency_now_desc">Se você está em uma situação de perigo, busque ajuda imediata:</p>
+
+        <div class="emergency-buttons">
+          <a href="tel:190" class="btn-call danger-call">
+            <i class="fa-solid fa-phone"></i>
+            <div>
+              <strong data-i18n="call_190">LIGAR PARA 190</strong>
+              <span data-i18n="call_190_sub">Polícia Militar</span>
+            </div>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+
+          <a href="tel:180" class="btn-call warning-call">
+            <i class="fa-solid fa-phone-volume"></i>
+            <div>
+              <strong data-i18n="call_180">LIGAR PARA 180</strong>
+              <span data-i18n="call_180_sub">Central de Atendimento à Mulher<br><small>Orientação e apoio psicológico</small></span>
+            </div>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="other-options-section">
+        <h4 data-i18n="other_options">Outras opções:</h4>
+        <div class="option-card" onclick="openModal('chat-modal')">
+          <div class="opt-icon chat-icon"><i class="fa-solid fa-comments"></i></div>
+          <div class="opt-content">
+            <h4 data-i18n="emergency_chat">Chat de emergência</h4>
+            <p data-i18n="emergency_chat_sub">Converse com uma atendente</p>
+          </div>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+      </div>
+
+      <div class="security-footer-banner">
+        <i class="fa-solid fa-lock"></i>
+        <div>
+          <strong data-i18n="security_title">Sua segurança é prioridade.</strong>
+          <p data-i18n="security_space">Este é um espaço seguro e confidencial para você.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 4: FAZER DENÚNCIA -->
+    <section id="report" class="page-section">
+      <div class="section-header-back">
+        <button class="back-btn" onclick="navigateTo('home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2 data-i18n="report_header">Fazer denúncia</h2>
+      </div>
+
+      <div class="report-top-banner">
+        <div class="shield-icon"><i class="fa-solid fa-user-shield"></i></div>
+        <h3 data-i18n="hero_subtitle">Você não está sozinha.</h3>
+        <p data-i18n="report_banner_desc">Sua denúncia pode ajudar outras mulheres e salvar vidas.</p>
+      </div>
+
+      <form id="report-form" onsubmit="submitForm(event)">
+        <div class="form-group">
+          <label data-i18n="label_report_type">Como prefere fazer sua denúncia?</label>
+          <div class="radio-options">
+            <label class="radio-card active">
+              <input type="radio" name="anon_type" value="anon" checked onclick="toggleRadioCard(this)" />
+              <div>
+                <strong data-i18n="report_anon">Denúncia anônima</strong>
+                <p data-i18n="report_anon_sub">Sua identidade será mantida em sigilo</p>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="anon_type" value="identified" onclick="toggleRadioCard(this)" />
+              <div>
+                <strong data-i18n="report_id">Denúncia identificada</strong>
+                <p data-i18n="report_id_sub">Seus dados serão utilizados para o contato</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="label_type_violence">Sobre o que deseja denunciar?</label>
+          <div class="select-wrapper">
+            <i class="fa-solid fa-triangle-exclamation select-icon"></i>
+            <select required class="custom-select">
+              <option value="" disabled selected data-i18n="opt_select">Selecione o tipo de violência</option>
+              <option value="fisica">Violência Física</option>
+              <option value="psicologica">Violência Psicológica</option>
+              <option value="patrimonial">Violência Patrimonial</option>
+              <option value="sexual">Violência Sexual</option>
+              <option value="moral">Violência Moral</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="label_description">Conte o que aconteceu:</label>
+          <div class="textarea-wrapper">
+            <textarea id="report-text" rows="4" maxlength="1000" placeholder="Descreva a situação com o máximo de detalhes possível..." required oninput="updateCharCount()"></textarea>
+            <span class="char-counter"><span id="char-count">0</span>/1000</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="attach_label">Deseja adicionar provas ou arquivos?</label>
+          <div class="file-dropzone">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span data-i18n="attach_files">Enviar arquivos (fotos, áudios, documentos)</span>
+            <small data-i18n="attach_limit">Tamanho máximo: 10MB</small>
+            <input type="file" multiple onchange="handleFiles(this)" />
+          </div>
+          <div id="file-list" class="file-list"></div>
+        </div>
+
+        <button type="submit" class="btn-primary-large">
+          <i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send_report">Enviar denúncia</span>
+        </button>
+      </form>
+
+      <div class="important-notice">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>
+          <strong data-i18n="important_title">Importante!</strong>
+          <p data-i18n="important_desc">Em caso de emergência ligue 190</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 5: ONDE BUSCAR AJUDA -->
+    <section id="map" class="page-section">
+      <div class="section-header-back">
+        <button class="back-btn" onclick="navigateTo('home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2 data-i18n="map_header">Onde buscar ajuda</h2>
+      </div>
+
+      <p class="sub-header" data-i18n="map_subheader">Encontre serviços e instituições perto de você</p>
+
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="map-search" placeholder="Pesquisar por serviços ou instituição..." oninput="filterLocations()" />
+      </div>
+
+      <!-- MAPA INTERATIVO REAL (LEAFLET / OPENSTREETMAP) -->
+      <div id="map-container"></div>
+
+      <div class="locations-section">
+        <div class="locations-header">
+          <span><i class="fa-solid fa-location-dot"></i> <strong data-i18n="nearby_places">Locais próximos</strong></span>
+          <a href="#" onclick="showAllLocations(event)" data-i18n="see_all">Ver todos ></a>
+        </div>
+
+        <div id="places-list" class="places-list">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+
+      <div class="not-found-card">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>
+          <strong data-i18n="not_found_title">Não encontrou o que precisa?</strong>
+          <p data-i18n="not_found_desc">Fale com nossa equipe e receba orientações</p>
+        </div>
+        <button class="btn-outline" onclick="openModal('chat-modal')" data-i18n="contact_us">Fale conosco</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- NAVEGAÇÃO INFERIOR PARA DISPOSITIVOS MÓVEIS -->
+  <footer class="mobile-nav">
+    <button class="mob-btn active" data-target="home" onclick="navigateTo('home')">
+      <i class="fa-solid fa-house"></i>
+      <span data-i18n="nav_home">Início</span>
+    </button>
+    <button class="mob-btn" data-target="help" onclick="navigateTo('help')">
+      <i class="fa-solid fa-hand-holding-heart"></i>
+      <span data-i18n="nav_help">Ajuda</span>
+    </button>
+    <button class="mob-btn" data-target="emergency" onclick="navigateTo('emergency')">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span data-i18n="nav_emergency">Emergência</span>
+    </button>
+    <button class="mob-btn" data-target="report" onclick="navigateTo('report')">
+      <i class="fa-solid fa-shield-cat"></i>
+      <span data-i18n="nav_report">Denúncia</span>
+    </button>
+    <button class="mob-btn" data-target="map" onclick="navigateTo('map')">
+      <i class="fa-solid fa-location-dot"></i>
+      <span data-i18n="nav_map">Mapa</span>
+    </button>
+  </footer>
+
+  <!-- MODAL: DIREITOS DA MULHER -->
+  <div id="rights-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-scale-balanced"></i> <span data-i18n="modal_rights_title">Seus Direitos Legais</span></h3>
+        <button class="close-modal" onclick="closeModal('rights-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4>Lei Maria da Penha (Lei nº 11.340/2006)</h4>
+        <p>Garante medidas protetivas de urgência, como o afastamento do agressor do lar e proibição de aproximação.</p>
+        <br>
+        <h4>Tipos de Violência Reconhecidos:</h4>
+        <ul>
+          <li><strong>Física:</strong> Qualquer conduta que ofenda a integridade ou saúde corporal.</li>
+          <li><strong>Psicológica:</strong> Dano emocional, diminuição da autoestima, ameaça ou constrangimento.</li>
+          <li><strong>Sexual:</strong> Presenciar, manter ou participar de relação sexual não desejada mediante intimidação.</li>
+          <li><strong>Patrimonial:</strong> Retenção, subtração ou destruição parcial/total de bens ou documentos.</li>
+          <li><strong>Moral:</strong> Calúnia, difamação ou injúria.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INFORMAÇÕES ÚTEIS -->
+  <div id="info-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-lightbulb"></i> <span data-i18n="card_info_title">Informações úteis</span></h3>
+        <button class="close-modal" onclick="closeModal('info-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4>Plano de Segurança Pessoal:</h4>
+        <p>1. Mantenha contatos de emergência salvos em discagem rápida.</p>
+        <p>2. Deixe uma bolsa com documentos essenciais e roupas em local seguro ou com alguém de confiança.</p>
+        <p>3. Combine um código de alerta (palavra secreta ou emoji) com amigos ou familiares próximos.</p>
+        <br>
+        <h4>Canais de Suporte Gratuito:</h4>
+        <p><strong>Ligue 180:</strong> Gratuito, anônimo e funciona 24 horas por dia.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CHAT DE EMERGÊNCIA -->
+  <div id="chat-modal" class="modal-overlay">
+    <div class="modal-box chat-modal-box">
+      <div class="modal-header">
+        <div class="online-status">
+          <span class="status-dot"></span>
+          <div>
+            <h4 data-i18n="chat_header">Atendimento Acolhe</h4>
+            <small data-i18n="chat_status">Online • Canal Seguro</small>
+          </div>
+        </div>
+        <button class="close-modal" onclick="closeModal('chat-modal')">&times;</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg system-msg" data-i18n="chat_welcome">Olá! Você está em um canal seguro e confidencial. Como podemos te ajudar agora?</div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Digite sua mensagem..." onkeypress="handleChatKeyPress(event)" />
+        <button onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS (Mapa Real) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Custom JS -->
+  <script src="./script.js"></script>
+</body>
+</html>
