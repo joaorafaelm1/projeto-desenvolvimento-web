@@ -1,0 +1,12 @@
+{
+  "name": "acolhe-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MVP da disciplina de Desenvolvimento Web - Acolhe",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

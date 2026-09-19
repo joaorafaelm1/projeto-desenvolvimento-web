@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acolhe - Administração de Denúncias</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f3f7; color: #2b2230; }
+    main { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    h1 { margin-bottom: 6px; }
+    .sub { margin-top: 0; color: #665d69; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin: 24px 0; flex-wrap: wrap; }
+    button, select { padding: 9px 12px; border-radius: 8px; border: 1px solid #c8bdcc; }
+    button { cursor: pointer; background: #fff; }
+    button:hover { background: #f0e9f2; }
+    .danger { color: #9f1d35; }
+    .table-wrap { overflow-x: auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 12px; border-bottom: 1px solid #eee7f0; text-align: left; vertical-align: top; }
+    th { background: #efe7f1; }
+    td.descricao { max-width: 360px; white-space: pre-wrap; }
+    .empty { padding: 28px; text-align: center; color: #6f6572; }
+    .msg { min-height: 22px; font-weight: 600; }
+    .ok { color: #267342; }
+    .erro { color: #a12239; }
+.resumo {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 22px;
+    min-width: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+
+.card strong {
+    display: block;
+    font-size: 26px;
+    margin-bottom: 5px;
+}
+
+.card span {
+    color: #665d69;
+}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Painel de denúncias</h1>
+    <p class="sub">CRUD do MVP Acolhe — leitura, atualização e exclusão dos registros cadastrados pelo formulário.</p>
+    <div class="resumo">
+    <div class="card">
+        <strong id="total-denuncias">0</strong>
+        <span>Total</span>
+    </div>
+
+    <div class="card">
+        <strong id="total-recebidas">0</strong>
+        <span>Recebidas</span>
+    </div>
+
+    <div class="card">
+        <strong id="total-analise">0</strong>
+        <span>Em análise</span>
+    </div>
+
+    <div class="card">
+        <strong id="total-concluidas">0</strong>
+        <span>Concluídas</span>
+    </div>
+</div>
+
+    <div class="toolbar">
+      <button onclick="carregarDenuncias()">Atualizar lista</button>
+      <a href="/">Voltar ao site</a>
+      <span id="mensagem" class="msg"></span>
+    </div>
+<p id="status-servidor">Verificando conexão...</p>
+<div id="resumo">
+    <strong>Total: <span id="total">0</span></strong>
+    |
+    Recebidas: <span id="recebidas">0</span>
+    |
+    Em análise: <span id="analise">0</span>
+    |
+    Concluídas: <span id="concluidas">0</span>
+</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Forma</th>
+            <th>Violência</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo-tabela"></tbody>
+      </table>
+      <div id="vazio" class="empty" hidden>Nenhuma denúncia cadastrada ainda.</div>
+    </div>
+  </main>
+
+  <script>
+    let denuncias = [];
+
+    function mostrarMensagem(texto, tipo = 'ok') {
+      const el = document.getElementById('mensagem');
+      el.textContent = texto;
+      el.className = `msg ${tipo}`;
+      setTimeout(() => { el.textContent = ''; }, 3000);
+    }
+
+    function escapar(texto) {
+      return String(texto)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function carregarDenuncias() {
+      try {
+        const resposta = await fetch('/api/denuncias');
+        if (!resposta.ok) throw new Error('Falha ao carregar.');
+        denuncias = await resposta.json();
+        renderizar();
+      } catch (erro) {
+        mostrarMensagem('Não foi possível carregar as denúncias.', 'erro');
+      }
+    }
+function atualizarResumo() {
+    const total = denuncias.length;
+
+    const recebidas = denuncias.filter(
+        d => d.status === 'Recebida'
+    ).length;
+
+    const analise = denuncias.filter(
+        d => d.status === 'Em análise'
+    ).length;
+
+    const concluidas = denuncias.filter(
+        d => d.status === 'Concluída'
+    ).length;
+
+    document.getElementById('total-denuncias').textContent = total;
+    document.getElementById('total-recebidas').textContent = recebidas;
+    document.getElementById('total-analise').textContent = analise;
+    document.getElementById('total-concluidas').textContent = concluidas;
+}
+    function renderizar() {
+      const tbody = document.getElementById('corpo-tabela');
+      const vazio = document.getElementById('vazio');
+      atualizarResumo();
+      tbody.innerHTML = '';
+      document.getElementById('total').textContent = denuncias.length;
+
+document.getElementById('recebidas').textContent =
+    denuncias.filter(d => d.status === 'Recebida').length;
+
+document.getElementById('analise').textContent =
+    denuncias.filter(d => d.status === 'Em análise').length;
+
+document.getElementById('concluidas').textContent =
+    denuncias.filter(d => d.status === 'Concluída').length;
+      tbody.innerHTML = '';
+      vazio.hidden = denuncias.length > 0;
+
+      for (const d of denuncias) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${d.id}</td>
+          <td>${d.tipo_denuncia === 'anon' ? 'Anônima' : 'Identificada'}</td>
+          <td>${escapar(d.tipo_violencia)}</td>
+          <td class="descricao">${escapar(d.descricao)}</td>
+          <td>
+            <select id="status-${d.id}">
+              ${['Recebida','Em análise','Concluída'].map(s =>
+                `<option value="${s}" ${d.status === s ? 'selected' : ''}>${s}</option>`
+              ).join('')}
+            </select>
+          </td>
+          <td>${escapar(d.criado_em)}</td>
+          <td>
+            <button onclick="salvarStatus(${d.id})">Salvar</button>
+            <button class="danger" onclick="excluirDenuncia(${d.id})">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    async function salvarStatus(id) {
+      const denuncia = denuncias.find(d => d.id === id);
+      const status = document.getElementById(`status-${id}`).value;
+
+      try {
+        const resposta = await fetch(`/api/denuncias/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo_violencia: denuncia.tipo_violencia,
+            descricao: denuncia.descricao,
+            status
+          })
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || 'Falha ao atualizar.');
+        mostrarMensagem(`Denúncia #${id} atualizada.`);
+        carregarDenuncias();
+      } catch (erro) {
+        mostrarMensagem(erro.message, 'erro');
+      }
+    }
+
+    async function excluirDenuncia(id) {
+      if (!confirm(`Excluir a denúncia #${id}?`)) return;
+
+      try {
+        const resposta = await fetch(`/api/denuncias/${id}`, { method: 'DELETE' });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || 'Falha ao excluir.');
+        mostrarMensagem(`Denúncia #${id} excluída.`);
+        carregarDenuncias();
+      } catch (erro) {
+        mostrarMensagem(erro.message, 'erro');
+      }
+    }
+async function verificarServidor() {
+    const status = document.getElementById('status-servidor');
+
+    try {
+        const resposta = await fetch('/api/health');
+        const dados = await resposta.json();
+
+        if (dados.ok) {
+            status.textContent = `🟢 Servidor conectado | Banco: ${dados.banco} | Arquivo: ${dados.arquivo}`;
+        } else {
+            status.textContent = '🔴 Problema na conexão com o servidor.';
+        }
+    } catch (erro) {
+        status.textContent = '🔴 Servidor desconectado.';
+    }
+}
+verificarServidor();
+carregarDenuncias();
+    carregarDenuncias();
+  </script>
+</body>
+</html>

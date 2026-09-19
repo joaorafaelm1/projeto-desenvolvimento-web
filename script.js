@@ -288,12 +288,47 @@ function handleFiles(input) {
   });
 }
 
-function submitForm(e) {
-  e.preventDefault();
-  alert("Sua denúncia foi enviada com sucesso de forma totalmente segura e confidencial.");
-  e.target.reset();
-  document.getElementById('file-list').innerHTML = '';
-  document.getElementById('char-count').innerText = '0';
+async function submitForm(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const tipoDenuncia = form.querySelector('input[name="anon_type"]:checked')?.value;
+    const tipoViolencia = form.querySelector('.custom-select')?.value;
+    const descricao = document.getElementById('report-text').value.trim();
+
+    if (!tipoDenuncia || !tipoViolencia || !descricao) {
+        alert('Preencha os campos obrigatórios antes de enviar.');
+        return;
+    }
+
+    try {
+        const resposta = await fetch('/api/denuncias', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tipo_denuncia: tipoDenuncia,
+                tipo_violencia: tipoViolencia,
+                descricao: descricao
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(dados.erro || 'Não foi possível cadastrar a denúncia.');
+        }
+
+        alert(`Denúncia cadastrada no banco com sucesso. Protocolo: ${dados.id}`);
+
+        form.reset();
+        document.getElementById('file-list').innerHTML = '';
+        document.getElementById('char-count').innerText = '0';
+    } catch (erro) {
+        console.error(erro);
+        alert('Erro ao enviar a denúncia para o servidor. Confira se o backend está rodando.');
+    }
 }
 
 // --- MAPA REAL INTERATIVO (LEAFLET / OPENSTREETMAP) ---
