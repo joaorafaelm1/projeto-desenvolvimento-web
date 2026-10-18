@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de Denúncias - Acolhe</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f5f2f6; --card: #ffffff; --text: #2c2230; --muted: #746a78;
+      --primary: #6b3f75; --primary-soft: #eee5f1; --border: #e4dce7;
+      --danger: #a62c45; --ok: #2f7d4a; --warn: #996c17;
+    }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 50px; }
+    .topbar { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 28px; }
+    .subtitle { color: var(--muted); margin: 6px 0 0; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    button, input, select { font: inherit; }
+    button { border: 1px solid var(--border); background: #fff; padding: 9px 12px; border-radius: 9px; cursor: pointer; }
+    button:hover { background: #f8f4f9; }
+    button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    button.danger { color: var(--danger); }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .metric strong { display: block; font-size: 28px; margin-top: 6px; }
+    .metric span { color: var(--muted); font-size: 14px; }
+    .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .panel h3 { margin: 0 0 14px; font-size: 17px; }
+    .bar-row { display: grid; grid-template-columns: 150px 1fr 42px; gap: 10px; align-items: center; margin: 10px 0; }
+    .bar-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #4c4250; }
+    .bar-track { height: 12px; border-radius: 999px; background: #eee9ef; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--primary); min-width: 2px; }
+    .bar-value { text-align: right; font-weight: 700; }
+    .filters { display: grid; grid-template-columns: minmax(220px, 1fr) 180px 180px auto; gap: 10px; margin-bottom: 14px; }
+    input, select { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 10px; background: #fff; }
+    .table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--border); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+    th, td { padding: 11px; border-bottom: 1px solid #eee8ef; text-align: left; vertical-align: top; font-size: 14px; }
+    th { background: #f0e9f2; position: sticky; top: 0; }
+    td.desc { max-width: 330px; white-space: pre-wrap; }
+    .pill { display: inline-block; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 700; background: #eee9ef; }
+    .pill.Urgente { background: #fde8eb; color: #9d233b; }
+    .pill.Alta { background: #fff0df; color: #92540a; }
+    .pill.Atencao { background: #fff8dc; color: #7b6711; }
+    .pill.Padrao { background: #e7f4eb; color: #2e7044; }
+    .small { color: var(--muted); font-size: 12px; }
+    .notice { margin: 0 0 18px; padding: 12px 14px; border-radius: 10px; background: #fff8df; border: 1px solid #f0dea0; color: #6c5b14; }
+    .msg { min-height: 20px; margin: 10px 0; font-weight: 700; }
+    .msg.ok { color: var(--ok); } .msg.err { color: var(--danger); }
+    .empty { padding: 28px; text-align: center; color: var(--muted); }
+    .login-overlay { min-height: 75vh; display: grid; place-items: center; }
+    .login-card { width: min(420px, 100%); background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .login-card h2 { margin-top: 0; }
+    .field { margin: 12px 0; }
+    .field label { display: block; margin-bottom: 6px; font-size: 14px; color: #514755; }
+    .hidden { display: none !important; }
+    details { margin-top: 18px; }
+    .audit-wrap { overflow-x: auto; margin-top: 10px; }
+    @media (max-width: 850px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .panel-grid { grid-template-columns: 1fr; }
+      .filters { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+      .filters { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 110px 1fr 34px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section id="login-view" class="login-overlay">
+      <form id="login-form" class="login-card">
+        <h2>Acesso Administrativo</h2>
+        <p class="subtitle">Autenticação necessária para visualizar dados de denúncias.</p>
+        <div class="field"><label for="email">E-mail</label><input id="email" type="email" required autocomplete="username" /></div>
+        <div class="field"><label for="senha">Senha</label><input id="senha" type="password" required autocomplete="current-password" /></div>
+        <button class="primary" type="submit">Entrar</button>
+        <div id="login-msg" class="msg"></div>
+        <p class="small">No ambiente local, veja as credenciais exibidas no terminal ao iniciar o servidor.</p>
+      </form>
+    </section>
+
+    <section id="dashboard-view" class="hidden">
+      <div class="topbar">
+        <div>
+          <h1>Dashboard de Denúncias</h1>
+          <p class="subtitle">Análise de dados, gestão do CRUD e triagem experimental por IA.</p>
+        </div>
+        <div class="actions">
+          <button id="refresh-btn">Atualizar</button>
+          <button id="export-btn">Exportar dataset tratado (CSV)</button>
+          <button id="logout-btn">Sair</button>
+        </div>
+      </div>
+
+      <p class="notice"><strong>Triagem IA:</strong> recurso experimental de apoio à priorização. O resultado não substitui avaliação humana nem orientação de emergência.</p>
+
+      <div class="grid">
+        <div class="card metric"><span>Total de denúncias</span><strong id="m-total">0</strong></div>
+        <div class="card metric"><span>Recebidas</span><strong id="m-recebidas">0</strong></div>
+        <div class="card metric"><span>Em análise</span><strong id="m-analise">0</strong></div>
+        <div class="card metric"><span>Concluídas</span><strong id="m-concluidas">0</strong></div>
+      </div>
+
+      <div class="panel-grid">
+        <div class="card panel"><h3>Tipos de violência</h3><div id="chart-tipos"></div></div>
+        <div class="card panel"><h3>Triagem por IA</h3><div id="chart-riscos"></div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <div class="filters">
+          <input id="search" type="search" placeholder="Pesquisar por ID, descrição ou tipo..." />
+          <select id="filter-status"><option value="">Todos os status</option><option>Recebida</option><option>Em análise</option><option>Concluída</option></select>
+          <select id="filter-risk"><option value="">Todas as triagens</option><option>Padrao</option><option>Atencao</option><option>Alta</option><option>Urgente</option></select>
+          <button id="filter-btn">Filtrar</button>
+        </div>
+        <div id="msg" class="msg"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Data</th><th>Forma</th><th>Violência</th><th>Descrição</th><th>IA / Triagem</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div id="empty" class="empty hidden">Nenhuma denúncia encontrada.</div>
+        </div>
+      </div>
+
+      <details class="card">
+        <summary><strong>Logs de auditoria e rastreabilidade</strong></summary>
+        <div class="audit-wrap">
+          <table style="min-width:760px"><thead><tr><th>ID</th><th>Data</th><th>Operador</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody id="audit-rows"></tbody></table>
+        </div>
+      </details>
+    </section>
+  </div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const loginView = $('login-view');
+  const dashboardView = $('dashboard-view');
+  let reports = [];
+
+  async function api(url, options = {}) {
+    const res = await fetch(url, { credentials: 'same-origin', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
+    let data = null;
+    const type = res.headers.get('content-type') || '';
+    if (type.includes('application/json')) data = await res.json();
+    if (!res.ok) {
+      if (res.status === 401) showLogin();
+      throw new Error(data?.erro || `Erro HTTP ${res.status}`);
+    }
+    return data;
+  }
+
+  function showLogin() { loginView.classList.remove('hidden'); dashboardView.classList.add('hidden'); }
+  function showDashboard() { loginView.classList.add('hidden'); dashboardView.classList.remove('hidden'); }
+  function setMsg(text = '', kind = '') { const el = $('msg'); el.textContent = text; el.className = `msg ${kind}`; }
+
+  $('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = $('login-msg'); msg.textContent = 'Entrando...'; msg.className = 'msg';
+    try {
+      await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: $('email').value, senha: $('senha').value }) });
+      msg.textContent = '';
+      showDashboard();
+      await refreshAll();
+    } catch (err) { msg.textContent = err.message; msg.className = 'msg err'; }
+  });
+
+  $('logout-btn').addEventListener('click', async () => { try { await api('/api/auth/logout', { method:'POST', body:'{}' }); } catch {} showLogin(); });
+  $('refresh-btn').addEventListener('click', refreshAll);
+  $('filter-btn').addEventListener('click', loadReports);
+  $('search').addEventListener('keydown', e => { if (e.key === 'Enter') loadReports(); });
+  $('export-btn').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/admin/export.csv', { credentials: 'same-origin' });
+      if (!res.ok) throw new Error('Não foi possível exportar o dataset.');
+      const blob = await res.blob();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'acolhe_dataset_tratado.csv'; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } catch (e) { setMsg(e.message, 'err'); }
+  });
+
+  async function refreshAll() {
+    setMsg('Atualizando dados...');
+    try {
+      await Promise.all([loadAnalytics(), loadReports(), loadAudit()]);
+      setMsg('Dados atualizados.', 'ok');
+    } catch (e) { setMsg(e.message, 'err'); }
+  }
+
+  async function loadAnalytics() {
+    const a = await api('/api/admin/analytics');
+    $('m-total').textContent = a.total;
+    $('m-recebidas').textContent = a.status['Recebida'] || 0;
+    $('m-analise').textContent = a.status['Em análise'] || 0;
+    $('m-concluidas').textContent = a.status['Concluída'] || 0;
+    renderBars('chart-tipos', a.porTipo, a.total);
+    renderBars('chart-riscos', a.porRisco, a.total);
+  }
+
+  function labelize(value) {
+    return ({ fisica:'Física', psicologica:'Psicológica', patrimonial:'Patrimonial', sexual:'Sexual', moral:'Moral', Padrao:'Padrão', Atencao:'Atenção' })[value] || value;
+  }
+
+  function renderBars(id, data, total) {
+    const el = $(id); el.innerHTML = '';
+    if (!data?.length) { el.innerHTML = '<div class="small">Sem dados ainda.</div>'; return; }
+    for (const item of data) {
+      const row = document.createElement('div'); row.className = 'bar-row';
+      const pct = total ? Math.max(2, Math.round((Number(item.valor) / total) * 100)) : 0;
+      row.innerHTML = `<div class="bar-label" title="${escapeHtml(labelize(item.nome))}">${escapeHtml(labelize(item.nome))}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-value">${Number(item.valor)}</div>`;
+      el.appendChild(row);
+    }
+  }
+
+  async function loadReports() {
+    const qs = new URLSearchParams();
+    if ($('search').value.trim()) qs.set('search', $('search').value.trim());
+    if ($('filter-status').value) qs.set('status', $('filter-status').value);
+    if ($('filter-risk').value) qs.set('risco', $('filter-risk').value);
+    reports = await api(`/api/admin/denuncias?${qs}`);
+    renderReports();
+  }
+
+  function nextStatus(status) { return status === 'Recebida' ? 'Em análise' : status === 'Em análise' ? 'Concluída' : null; }
+
+  function renderReports() {
+    const body = $('rows'); body.innerHTML = '';
+    $('empty').classList.toggle('hidden', reports.length > 0);
+    for (const r of reports) {
+      const tr = document.createElement('tr');
+      const next = nextStatus(r.status);
+      const conf = r.triagem_confianca == null ? '-' : `${Math.round(Number(r.triagem_confianca) * 100)}%`;
+      tr.innerHTML = `
+        <td>${r.id}</td>
+        <td>${escapeHtml(r.criado_em || '')}</td>
+        <td>${r.tipo_denuncia === 'anon' ? 'Anônima' : 'Identificada'}</td>
+        <td>${escapeHtml(labelize(r.tipo_violencia))}</td>
+        <td class="desc">${escapeHtml(r.descricao)}</td>
+        <td><span class="pill ${escapeHtml(r.triagem_nivel || '')}">${escapeHtml(labelize(r.triagem_nivel || 'Sem triagem'))}</span><div class="small">Confiança: ${conf}</div></td>
+        <td><strong>${escapeHtml(r.status)}</strong></td>
+        <td>
+          ${next ? `<button data-action="status" data-id="${r.id}" data-status="${escapeHtml(next)}">→ ${escapeHtml(next)}</button>` : '<span class="small">Fluxo concluído</span>'}
+          <button data-action="ai" data-id="${r.id}">Reclassificar IA</button>
+          <button class="danger" data-action="delete" data-id="${r.id}">Excluir</button>
+        </td>`;
+      body.appendChild(tr);
+    }
+  }
+
+  $('rows').addEventListener('click', async e => {
+    const btn = e.target.closest('button[data-action]'); if (!btn) return;
+    const id = btn.dataset.id; const action = btn.dataset.action;
+    try {
+      if (action === 'status') {
+        await api(`/api/admin/denuncias/${id}/status`, { method:'PUT', body: JSON.stringify({ status: btn.dataset.status }) });
+        setMsg(`Denúncia #${id} atualizada.`, 'ok');
+      } else if (action === 'ai') {
+        await api(`/api/admin/denuncias/${id}/reclassificar`, { method:'POST', body:'{}' });
+        setMsg(`Triagem da denúncia #${id} recalculada.`, 'ok');
+      } else if (action === 'delete') {
+        if (!confirm(`Excluir a denúncia #${id}?`)) return;
+        await api(`/api/admin/denuncias/${id}`, { method:'DELETE' });
+        setMsg(`Denúncia #${id} excluída.`, 'ok');
+      }
+      await Promise.all([loadAnalytics(), loadReports(), loadAudit()]);
+    } catch (err) { setMsg(err.message, 'err'); }
+  });
+
+  async function loadAudit() {
+    const rows = await api('/api/admin/auditoria');
+    const body = $('audit-rows'); body.innerHTML = '';
+    for (const r of rows) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.id}</td><td>${escapeHtml(r.criado_em)}</td><td>${escapeHtml(r.operador)}</td><td>${escapeHtml(r.acao)}</td><td>${escapeHtml(r.detalhes || '')}</td>`;
+      body.appendChild(tr);
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+  }
+
+  (async function init() {
+    try { await api('/api/auth/me'); showDashboard(); await refreshAll(); }
+    catch { showLogin(); }
+  })();
+</script>
+</body>
+</html>

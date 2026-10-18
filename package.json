@@ -1,10 +1,11 @@
 {
   "name": "acolhe-mvp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "MVP da disciplina de Desenvolvimento Web - Acolhe",
+  "description": "MVP Acolhe - frontend, backend, SQLite, autenticação/autorização, dashboard analítico e triagem por IA local",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test-smoke.js"
   },
   "engines": {
     "node": ">=22.5.0"
